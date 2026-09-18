@@ -149,8 +149,9 @@ class SQLiteAgentMemory:
         except Exception as e:
             logger.warning(f"Failed to record to SQLite memory: {e}")
 
-    @lru_cache(maxsize=256)
-    def search_similar(self, query: str, limit: int = 2) -> List[Dict[str, str]]:
+    # Yüksek bellek kapasitesi için önbellek 4096 girdiye yükseltildi
+    @lru_cache(maxsize=4096)
+    def search_similar(self, query: str, limit: int = 5) -> List[Dict[str, str]]:
         clean_q = re.sub(r'[^a-zA-Z0-9_\s]', ' ', query).strip()
         tokens = [t for t in clean_q.split() if len(t) > 3][:4]
         if not tokens:
@@ -446,32 +447,50 @@ class FreeProviderRouter:
                 "type": "openai",
             })
 
-        # 2. Dinamik Awesome-FreeLLM-APIs Deposu (GitHub)
+        # 2. Dinamik 5 Farklı Awesome Free LLM API Deposu (GitHub Raw & Mirrors)
+        free_repo_catalogs = [
+            ("Awesome-FreeLLM-APIs", "https://raw.githubusercontent.com/open-free-llm-api/awesome-freellm-apis/main/README.md"),
+            ("Awesome-Free-ChatGPT", "https://raw.githubusercontent.com/LiLittleCat/awesome-free-chatgpt/main/README.md"),
+            ("Awesome-Free-AI", "https://raw.githubusercontent.com/fakhari/awesome-free-ai/main/README.md"),
+            ("Awesome-LLM-Free", "https://raw.githubusercontent.com/mahrtayyab/awesome-llm/main/README.md"),
+            ("Cool-AI-Stuff", "https://raw.githubusercontent.com/zukixa/cool-ai-stuff/main/README.md")
+        ]
+
         try:
             import urllib.request
             import re
-            logger.info("[Awesome-FreeLLM-APIs] GitHub deposu taranıyor...")
-            url = "https://raw.githubusercontent.com/open-free-llm-api/awesome-freellm-apis/main/README.md"
-            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-            with urllib.request.urlopen(req, timeout=5.0) as resp:
-                content = resp.read().decode('utf-8')
-                urls = re.findall(r'(https?://[^\s)\]"\']+)', content)
-                for u in urls:
-                    if ("/v1" in u or "api" in u.lower()) and "github.com" not in u:
-                        u = u.strip('`').strip()
-                        if u not in [p['endpoint'] for p in self.providers]:
-                            endpoint = u if u.endswith("/chat/completions") else f"{u.rstrip('/')}/v1/chat/completions"
-                            self.providers.append({
-                                "name": f"awesome_freellm_{len(self.providers)}",
-                                "endpoint": endpoint,
-                                "model": "gpt-3.5-turbo",
-                                "key": "",
-                                "type": "openai",
-                                "config": {"max_tokens": 2048, "temperature": 0.4, "output_format": "text"}
-                            })
-            logger.info(f"[Awesome-FreeLLM-APIs] {len(self.providers) - 1} adet dinamik uç nokta Github deposundan başarıyla bağlandı.")
+            
+            for catalog_name, url in free_repo_catalogs:
+                try:
+                    logger.info(f"[{catalog_name}] Deposu taranıyor: {url}")
+                    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
+                    with urllib.request.urlopen(req, timeout=3.5) as resp:
+                        content = resp.read().decode('utf-8', errors='ignore')
+                        urls = re.findall(r'(https?://[^\s)\]"\']+)', content)
+                        added_from_repo = 0
+                        for u in urls:
+                            if ("/v1" in u or "api" in u.lower() or "chat/completions" in u) and "github.com" not in u and "raw.githubusercontent" not in u:
+                                u = u.strip('`').strip().rstrip('/')
+                                endpoint = u if u.endswith("/chat/completions") else f"{u}/v1/chat/completions"
+                                if endpoint not in [p.get('endpoint') for p in self.providers]:
+                                    self.providers.append({
+                                        "name": f"{catalog_name.lower()}_{len(self.providers)}",
+                                        "endpoint": endpoint,
+                                        "model": "gpt-4o-mini" if "4o" in u else "gpt-3.5-turbo",
+                                        "key": "",
+                                        "type": "openai",
+                                        "config": {"max_tokens": 4096, "temperature": 0.3, "output_format": "text"}
+                                    })
+                                    added_from_repo += 1
+                                    if added_from_repo >= 5: # Her depodan en güvenilir ilk 5 uç noktayı havuzla
+                                        break
+                        logger.info(f"[{catalog_name}] {added_from_repo} adet ücretsiz uç nokta eklendi.")
+                except Exception as repo_err:
+                    logger.warning(f"[{catalog_name}] Deposu taranamadı ({repo_err}), sonraki depoya geçiliyor.")
+                    
+            logger.info(f"[Multi-Repo Sync] Toplam {len(self.providers)} adet sağlayıcı uç noktası kullanıma hazır.")
         except Exception as e:
-            logger.warning(f"[Awesome-FreeLLM-APIs] Depo çekilemedi, sabit havuz kullanılıyor: {e}")
+            logger.warning(f"[Free LLM Multi-Repo] Depolar çekilirken genel hata, sabit havuz kullanılıyor: {e}")
 
         # 3. Embedded Zero-Key Free Endpoint: Pollinations DeepSeek Engine
         self.providers.append({

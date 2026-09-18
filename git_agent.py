@@ -10,7 +10,7 @@ class AutoGitAgent:
     Ajanların yazdıkları kodları otomatik olarak commit edip pushlamasını sağlar.
     GITHUB_TOKEN veya GH_TOKEN ortam değişkeni sağlandığında otomatik yetkilendirme ile push yapar.
     """
-    def __init__(self, default_branch="main", repo_url="https://github.com/furkanarslangray/onyx-nexus.git"):
+    def __init__(self, default_branch="main", repo_url="https://github.com/furkanarslangraydomain-stack/ONYX-Nexus.git"):
         self.default_branch = default_branch
         self.repo_url = repo_url
 

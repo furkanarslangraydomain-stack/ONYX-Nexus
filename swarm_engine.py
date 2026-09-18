@@ -10,12 +10,18 @@ import gc
 logger = logging.getLogger(__name__)
 
 
-def set_memory_limit():
-    """Unix tabanlı sistemlerde Sandbox'ın yiyebileceği maksimum RAM'i kısıtlar (Örn: 12GB)."""
+def set_memory_limit(unlimited: bool = True):
+    """
+    Sistem RAM sınırını yönetir.
+    256 MB veya 12 GB gibi yapay kısıtlamalar kaldırılmıştır.
+    Varsayılan olarak kısıtlamasız (unlimited) tam sistem belleği (Colab 20GB+ RAM) tahsis edilir.
+    """
+    if unlimited:
+        # 256MB / 12GB gibi suni kısıtlamalar tamamen kaldırıldı - sınırsız RAM tahsisi
+        return
     try:
         import resource
-        max_mem = 12 * 1024 * 1024 * 1024 # 12 GB
-        resource.setrlimit(resource.RLIMIT_AS, (max_mem, max_mem))
+        resource.setrlimit(resource.RLIMIT_AS, (resource.RLIM_INFINITY, resource.RLIM_INFINITY))
     except Exception:
         pass # Windows veya kısıtlama desteklenmeyen ortam
 
