@@ -1,0 +1,11 @@
+# ONYX-NEXUS DEPENDENCIES
+fastapi==0.104.1
+uvicorn==0.24.0.post1
+httpx==0.25.1
+litellm==1.10.1
+psutil==5.9.6
+sentence-transformers==2.2.2
+torch==2.1.1
+pydantic==2.5.2
+python-multipart==0.0.6
+e2b_code_interpreter>=1.0.0
