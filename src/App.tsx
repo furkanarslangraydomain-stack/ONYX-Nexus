@@ -20,9 +20,12 @@ import { ArchitectureDiagram } from './components/ArchitectureDiagram';
 import { DiagnosticPanel } from './components/DiagnosticPanel';
 import { CodeViewer } from './components/CodeViewer';
 import { CloudDeployGuide } from './components/CloudDeployGuide';
+import { RenderStudio3D } from './components/RenderStudio3D';
+import { PolyglotSandbox } from './components/PolyglotSandbox';
+import { SystemAutonomousHub } from './components/SystemAutonomousHub';
 import { DeliverableTab } from './types';
 
-type ActiveTab = 'chat' | 'skills' | 'colab' | 'architecture' | 'diagnostic' | 'code' | 'deploy';
+type ActiveTab = 'chat' | 'render3d' | 'polyglot' | 'consensus' | 'skills' | 'colab' | 'architecture' | 'diagnostic' | 'code' | 'deploy';
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -31,10 +34,13 @@ export default function App() {
 
   const navItems = [
     { id: 'chat' as ActiveTab, label: 'Ajan Sohbeti & MCP', icon: MessageSquare, badge: 'Aktif' },
+    { id: 'render3d' as ActiveTab, label: '3D Render Studio', icon: Layers, badge: 'Three.js' },
+    { id: 'polyglot' as ActiveTab, label: 'Çoklu Dil Sandbox', icon: Code2, badge: '6 Dil' },
+    { id: 'consensus' as ActiveTab, label: 'Swarm & Sistem Hub', icon: ShieldCheck, badge: 'Swarm' },
     { id: 'skills' as ActiveTab, label: '36+ MCP Yetenekleri', icon: Wrench, badge: '36 Araç' },
-    { id: 'colab' as ActiveTab, label: 'Colab Kontrol Merkezi', icon: Cpu, badge: '20GB' },
+    { id: 'colab' as ActiveTab, label: 'Colab 5-Mesh Merkezi', icon: Cpu, badge: '5 Düğüm' },
     { id: 'architecture' as ActiveTab, label: 'Swarm Ajan Mimarisi', icon: Layers },
-    { id: 'diagnostic' as ActiveTab, label: 'Sistem Tanılama (Diagnostic)', icon: Activity },
+    { id: 'diagnostic' as ActiveTab, label: 'Sistem Tanılama', icon: Activity },
     { id: 'code' as ActiveTab, label: 'Kaynak Kodları', icon: Code2 },
     { id: 'deploy' as ActiveTab, label: 'Kurulum & Dağıtım', icon: BookOpen },
   ];
@@ -165,6 +171,9 @@ export default function App() {
         {/* Dynamic Tab View */}
         <main className="flex-1 overflow-hidden relative">
           {activeTab === 'chat' && <ChatInterface />}
+          {activeTab === 'render3d' && <RenderStudio3D />}
+          {activeTab === 'polyglot' && <PolyglotSandbox />}
+          {activeTab === 'consensus' && <SystemAutonomousHub />}
           {activeTab === 'skills' && (
             <div className="h-full overflow-y-auto p-4 md:p-6 bg-slate-950">
               <SkillsHub />

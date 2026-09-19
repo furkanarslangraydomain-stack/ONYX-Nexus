@@ -1,6 +1,6 @@
 {
   "name": "Remix Onyx-Nexus Mobile Orchestrator",
-  "description": "A lightweight Termux-based agent ecosystem bridging OpenAI-compatible endpoints to secure E2B sandboxes and Notion memory logs.",
+  "description": "A high-performance autonomous agent OS featuring a 5-node Colab mesh cluster, 36+ MCP tools, polyglot sandbox compiler, consensus swarm, and a professional Three.js 3D render studio.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

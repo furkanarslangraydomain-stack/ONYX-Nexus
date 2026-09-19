@@ -319,6 +319,98 @@ export const ColabControlCenter: React.FC = () => {
         </div>
       </div>
 
+      {/* 2.5 5-NODE DISTRIBUTED COLAB MESH CLUSTER */}
+      <div className="bg-slate-900 border border-emerald-500/30 rounded-xl p-5 shadow-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3 mb-4">
+          <div>
+            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+              <Layers className="w-4 h-4 text-emerald-400" />
+              5-Node Distributed Google Colab Mesh Kümesi
+            </h3>
+            <p className="text-xs text-slate-400 mt-0.5">
+              5 ayrı Colab hücresinde izole mikroservisler olarak çalışan ve Cloudflare tünelleriyle birbirine bağlanan mesh ağı.
+            </p>
+          </div>
+          <span className="px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[11px] font-mono font-bold flex items-center gap-1.5 self-start sm:self-auto">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> 5 Düğüm Aktif
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+          {[
+            {
+              id: 1,
+              name: 'Node 1: Orchestrator',
+              port: 8000,
+              role: 'Master Router & /v1',
+              desc: 'Open WebUI köprüsü ve WebSocket terminali',
+              tag: 'ANA DÜĞÜM',
+              status: 'ONLINE'
+            },
+            {
+              id: 2,
+              name: 'Node 2: Polyglot',
+              port: 8001,
+              role: 'Çok Dilli Derleyici',
+              desc: 'Solidity, Rust, Go, C++, TS & Python',
+              tag: 'SANDBOX',
+              status: 'ONLINE'
+            },
+            {
+              id: 3,
+              name: 'Node 3: Consensus',
+              port: 8002,
+              role: '3-Ajan Karar Matrisi',
+              desc: 'Mimar, Web3 Güvenlik & QA Denetimi',
+              tag: 'SWARM',
+              status: 'ONLINE'
+            },
+            {
+              id: 4,
+              name: 'Node 4: 3D Studio',
+              port: 8003,
+              role: 'Three.js Asset Motoru',
+              desc: 'Prosedürel sahneler, PBR & Shaders',
+              tag: 'RENDER',
+              status: 'ONLINE'
+            },
+            {
+              id: 5,
+              name: 'Node 5: Memory DB',
+              port: 8004,
+              role: 'FTS5 WAL Hub',
+              desc: 'SQLite yüksek eşzamanlılık ve hafıza',
+              tag: 'VEKTÖR',
+              status: 'ONLINE'
+            },
+          ].map((node) => (
+            <div
+              key={node.id}
+              className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex flex-col justify-between hover:border-emerald-500/50 transition font-mono"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-bold">
+                    {node.tag}
+                  </span>
+                  <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> {node.status}
+                  </span>
+                </div>
+                <div className="text-xs font-bold text-slate-100 truncate">{node.name}</div>
+                <div className="text-[11px] text-emerald-400 font-semibold mt-0.5">{node.role}</div>
+                <div className="text-[10px] text-slate-500 mt-1 leading-snug">{node.desc}</div>
+              </div>
+
+              <div className="mt-3 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-400">
+                <span>Port: <b className="text-cyan-400">{node.port}</b></span>
+                <span className="text-[9px] text-slate-500">trycloudflare.com</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* 3. Canlı Ajan Konsolu & Test Alanı */}
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
