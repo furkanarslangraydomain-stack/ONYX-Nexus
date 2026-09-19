@@ -5,6 +5,7 @@ Onyx-Nexus, sadece kod yazan bir sohbet botu değil; otonom araştırma yapabile
 ## 🔥 Süper Güçleri
 - **Fraktal Swarm Motoru:** Görevi anlar, kendini dinamik olarak alt ajanlara böler (Mimar, Geliştirici, QA) ve paralel çalıştırır.
 - **Otonom Kod Sandbox'ı (E2B & Local):** Yazdığı kodu sana vermeden önce kendi kendine çalıştırır, hatası varsa yakalar ve düzeltir. İsteğe bağlı olarak **E2B Cloud Sandbox** destekler!
+- **Mega MCP 36+ Yetenek Paketi:** Dosya sistemi, SQLite FTS5 kalıcı hafıza, canlı web araştırması, izole kod sandbox'ı, Git otomasyonu ve Swarm yönlendirme dahil 36 tam otonom yetenek.
 - **Deep Research (Derin Araştırma):** Halüsinasyon görmez! Wikipedia ve Web üzerinde anlık araştırma yapıp kanıtlara dayalı cevap verir.
 - **Auto-Git (CI/CD):** Ürettiği çalışan kodları anında GitHub deponuza Pushlar.
 - **Kalıcı Öğrenme & Kişilik Klonlama:** `/ogret` komutu ile şirket kurallarınızı veya yazılım tercihlerinizi yerel Vektör Veritabanına kaydeder. Sohbetlerinizi analiz edip sizin üslubunuzla konuşur.

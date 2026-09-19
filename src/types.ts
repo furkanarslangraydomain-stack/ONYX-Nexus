@@ -1,4 +1,5 @@
 export type DeliverableTab =
+  | 'mega_mcp_server.py'
   | 'agent_crew.py'
   | 'main.py'
   | 'colab_dashboard.py'

@@ -1373,8 +1373,14 @@ async def websocket_terminal_endpoint(websocket: WebSocket):
 @app.get("/v1/tools")
 @app.get("/api/mcp/tools")
 async def get_mcp_tools():
-    """Returns OpenAI-compatible tools schema for function calling."""
-    return {"tools": mega_mcp.get_openai_tools_schema()}
+    """Returns OpenAI-compatible tools schema and detailed metadata for all 36 capabilities."""
+    raw = mega_mcp._get_tools_list()
+    return {
+        "tools": mega_mcp.get_openai_tools_schema(),
+        "raw_tools": raw,
+        "count": len(raw),
+        "version": "2.5.0"
+    }
 
 @app.post("/api/mcp/execute")
 async def execute_mcp_tool_route(req: Request):
@@ -1383,9 +1389,18 @@ async def execute_mcp_tool_route(req: Request):
     args = data.get("arguments", {})
     try:
         res = mega_mcp.call_tool(name, args)
-        return {"success": True, "result": res}
+        return {"success": True, "tool": name, "result": res}
     except Exception as e:
-        return {"success": False, "error": str(e)}
+        return {"success": False, "tool": name, "error": str(e)}
+
+@app.post("/api/git/push")
+async def api_git_push(req: Request):
+    """Automated Git commit & push endpoint using token."""
+    data = await req.json()
+    msg = data.get("message", "feat: update ONYX-Nexus ecosystem with 36+ MCP tools")
+    token = data.get("token") or os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    res = mega_mcp.call_tool("git_commit_and_push", {"message": msg, "token": token, "repo_path": "."})
+    return res
 
 def get_colab_system_stats() -> Dict[str, Any]:
     ram_info = {"total_gb": TOTAL_RAM_GB, "available_gb": TOTAL_RAM_GB, "used_gb": 0.0, "percent": 0.0}
