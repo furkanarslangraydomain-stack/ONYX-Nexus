@@ -1,5 +1,4 @@
 import MAIN_PY_CONTENT from '../../main.py?raw';
-import MEGA_MCP_SERVER_CONTENT from '../../mega_mcp_server.py?raw';
 import INSTALL_SH_CONTENT from '../../install.sh?raw';
 import SETUP_SH_CONTENT from '../../setup.sh?raw';
 import COLAB_RUNNER_CONTENT from '../../colab_runner.py?raw';
@@ -93,14 +92,6 @@ PORT=8000
 `;
 
 export const DELIVERABLE_FILES: Record<string, DeliverableFile> = {
-  'mega_mcp_server.py': {
-    filename: 'mega_mcp_server.py',
-    language: 'python',
-    title: 'ONYX Mega MCP Sunucusu (36+ Yetenek)',
-    description: '36 adet otonom MCP aracı içeren Model Context Protocol (v2.5) sunucusu: Dosya işlemleri, SQLite FTS5, DuckDuckGo, izole sandbox ve Git entegrasyonu.',
-    tag: 'Mega MCP Server',
-    content: MEGA_MCP_SERVER_CONTENT,
-  },
   'agent_crew.py': {
     filename: 'agent_crew.py',
     language: 'python',

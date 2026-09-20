@@ -28,6 +28,8 @@ class AutoGitAgent:
         token = os.getenv("GITHUB_TOKEN") or os.getenv("GH_TOKEN") or os.getenv("GIT_TOKEN")
         if token:
             clean = self.repo_url.replace("https://", "")
+            if "@" in clean:
+                clean = clean.split("@")[-1]
             return f"https://{token}@{clean}"
         return self.repo_url
 
@@ -35,8 +37,8 @@ class AutoGitAgent:
         logs = []
         
         # 1. Config User
-        self.execute_command(["git", "config", "user.name", "Onyx-Nexus Agent"])
-        self.execute_command(["git", "config", "user.email", "agent@onyx-nexus.ai"])
+        self.execute_command(["git", "config", "user.name", "furkanarslangray"])
+        self.execute_command(["git", "config", "user.email", "furkanarslangray@gmail.com"])
 
         # 2. Status & Add
         add_res = self.execute_command(["git", "add", "."])

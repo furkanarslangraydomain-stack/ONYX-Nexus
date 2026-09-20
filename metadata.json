@@ -1,7 +1,7 @@
 {
   "name": "Remix Onyx-Nexus Mobile Orchestrator",
-  "description": "A high-performance autonomous agent OS featuring a 5-node Colab mesh cluster, 36+ MCP tools, polyglot sandbox compiler, consensus swarm, and a professional Three.js 3D render studio.",
-  "requestFramePermissions": [],
+  "description": "High-performance autonomous agent ecosystem with interactive architecture blueprint, 3-agent consensus swarm, polyglot compiler sandbox, Web3 auditor, 3D studio, and 5-node Colab mesh cluster.",
+  "requestFramePermissions": ["microphone"],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
   ]

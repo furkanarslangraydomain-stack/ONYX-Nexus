@@ -408,9 +408,18 @@ export function ChatInterface() {
                   : 'bg-slate-800/80 text-slate-200 border border-slate-700/50'
             }`}>
               {msg.role === 'assistant' && (
-                <div className="flex items-center gap-2 mb-2 text-xs font-mono text-emerald-400">
-                  <Terminal className="w-3.5 h-3.5" />
-                  <span>{msg.agentProcess || 'Onyx-Nexus'}</span>
+                <div className="flex items-center justify-between gap-2 mb-2 text-xs font-mono text-emerald-400">
+                  <div className="flex items-center gap-2">
+                    <Terminal className="w-3.5 h-3.5" />
+                    <span>{msg.agentProcess || 'Onyx-Nexus'}</span>
+                  </div>
+                  <button
+                    onClick={() => speakText(msg.content)}
+                    className="p-1 text-slate-400 hover:text-emerald-400 rounded hover:bg-slate-700/60 transition"
+                    title="Sesli Dinle (TTS)"
+                  >
+                    <Volume2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               )}
               
