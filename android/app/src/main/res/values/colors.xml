@@ -1,0 +1,6 @@
+<resources>
+    <color name="onyx_background">#0A0D14</color>
+    <color name="onyx_surface">#0E121A</color>
+    <color name="onyx_primary">#06B6D4</color>
+    <color name="onyx_secondary">#10B981</color>
+</resources>

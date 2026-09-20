@@ -1,0 +1,9 @@
+# Optional integrations are intentionally not hard requirements for the
+# existing SQLite/HTTP/subprocess execution paths.
+mem0ai>=0.1.115
+lancedb>=0.17.0
+# Piston is consumed through its HTTP API; no Python package is required.
+guardrails-ai>=0.5.0
+# E2B and LiteLLM are already used by the existing fallback-aware runtime.
+e2b-code-interpreter>=1.0.0
+litellm>=1.10.1
