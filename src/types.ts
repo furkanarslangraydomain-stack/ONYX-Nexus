@@ -29,14 +29,24 @@ export interface AgentPhaseState {
   retries?: number;
 }
 
-export interface PipelineSimulationResult {
-  prompt: string;
-  blueprint: string;
-  generatedCode: string;
-  terminalOutput: string;
-  retryAttempts: number;
-  notionPageId: string;
-  openaiPayload: any;
-  status: 'SUCCESS' | 'FAILED';
-  totalDurationMs: number;
+export interface AgentBotConfig {
+  id: string;
+  name: string;
+  role: string;
+  avatar: string;
+  description: string;
+  status: 'ACTIVE' | 'STANDBY' | 'BUSY';
+  capabilities: string[];
+  color: string;
+}
+
+export interface WorkflowConfig {
+  id: string;
+  name: string;
+  description: string;
+  steps: string[];
+  estimatedDuration: string;
+  recommendedFor: string;
+  icon: string;
+  activeAgents: string[];
 }

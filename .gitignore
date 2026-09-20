@@ -9,4 +9,6 @@ coverage/
 __pycache__/
 *.pyc
 *.db
+*.db-shm
+*.db-wal
 free_apis_repos/

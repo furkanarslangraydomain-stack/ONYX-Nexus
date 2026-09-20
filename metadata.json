@@ -1,6 +1,6 @@
 {
   "name": "Remix Onyx-Nexus Mobile Orchestrator",
-  "description": "High-performance autonomous agent ecosystem featuring a professional 3D keyframe animation studio, 5 external modules (GLTF/3D library, physics engine, audio-reactive VJ, cinematic post-processing, WebXR director camera), autonomous self-healing sentinel, and multi-agent swarm.",
+  "description": "Gemini-styled autonomous AI OS with 9 specialized agents, Zero-Knowledge Privacy Shield, 5-cell Colab Mesh, and native Android Kotlin client.",
   "requestFramePermissions": ["microphone"],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

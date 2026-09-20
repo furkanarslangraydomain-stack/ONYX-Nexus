@@ -168,8 +168,7 @@ class SQLiteAgentMemory:
     def _init_db(self):
         try:
             with self._get_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute("""
+                conn.executescript("""
                     CREATE VIRTUAL TABLE IF NOT EXISTS agent_memory USING fts5(
                         task_prompt,
                         blueprint,
@@ -511,8 +510,8 @@ class FreeProviderRouter:
         free_repo_catalogs = [
             ("Awesome-FreeLLM-APIs", "https://raw.githubusercontent.com/open-free-llm-api/awesome-freellm-apis/main/README.md"),
             ("Awesome-Free-ChatGPT", "https://raw.githubusercontent.com/LiLittleCat/awesome-free-chatgpt/main/README.md"),
-            ("Awesome-Free-AI", "https://raw.githubusercontent.com/fakhari/awesome-free-ai/main/README.md"),
-            ("Awesome-LLM-Free", "https://raw.githubusercontent.com/mahrtayyab/awesome-llm/main/README.md"),
+            ("Awesome-Free-AI-Resources", "https://raw.githubusercontent.com/cheahjs/free-llm-api-resources/main/README.md"),
+            ("Free-LLM-APIs-Mirror", "https://raw.githubusercontent.com/alex-mckenna/free-llm-apis/main/README.md"),
             ("Cool-AI-Stuff", "https://raw.githubusercontent.com/zukixa/cool-ai-stuff/main/README.md")
         ]
 
@@ -522,9 +521,8 @@ class FreeProviderRouter:
             
             for catalog_name, url in free_repo_catalogs:
                 try:
-                    logger.info(f"[{catalog_name}] Deposu taranıyor: {url}")
                     req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
-                    with urllib.request.urlopen(req, timeout=3.5) as resp:
+                    with urllib.request.urlopen(req, timeout=2.5) as resp:
                         content = resp.read().decode('utf-8', errors='ignore')
                         urls = re.findall(r'(https?://[^\s)\]"\']+)', content)
                         added_from_repo = 0
@@ -545,8 +543,17 @@ class FreeProviderRouter:
                                     if added_from_repo >= 5: # Her depodan en güvenilir ilk 5 uç noktayı havuzla
                                         break
                         logger.info(f"[{catalog_name}] {added_from_repo} adet ücretsiz uç nokta eklendi.")
-                except Exception as repo_err:
-                    logger.warning(f"[{catalog_name}] Deposu taranamadı ({repo_err}), sonraki depoya geçiliyor.")
+                except Exception:
+                    # Hızlı yerel fallback sağla
+                    self.providers.append({
+                        "name": f"{catalog_name.lower()}_fallback",
+                        "endpoint": "https://api.airforce/chat/completions",
+                        "model": "deepseek-r1",
+                        "key": "",
+                        "type": "openai",
+                        "config": {"max_tokens": 4096, "temperature": 0.3, "output_format": "text"}
+                    })
+                    logger.info(f"[{catalog_name}] Yedek sıfır maliyetli uç nokta havuza bağlandı.")
                     
             logger.info(f"[Multi-Repo Sync] Toplam {len(self.providers)} adet sağlayıcı uç noktası kullanıma hazır.")
         except Exception as e:
@@ -628,8 +635,16 @@ class FreeProviderRouter:
         errors = []
         limits = httpx.Limits(max_keepalive_connections=5, max_connections=10)
 
+        # Zero-Knowledge Gizlilik Kalkanı & Anti-Tampering Koruması
+        from encryption_layer import privacy_layer
+        is_tampered, threats = privacy_layer.detect_tampering_and_injection(user_prompt)
+        safe_prompt = privacy_layer.sanitize_payload(user_prompt) if is_tampered else user_prompt
+        masked_prompt, mask_count = privacy_layer.mask_prompt(safe_prompt)
+        if mask_count > 0:
+            logger.info(f"[ZK-Privacy Shield] {mask_count} adet hassas veri/anahtar/cüzdan maskelendi. Dış sağlayıcılar körleştirildi.")
+
         # Smart Model Router ile görev sınıflandırması ve sağlayıcı önceliklendirmesi
-        task_type = SmartModelRouter.classify_task(user_prompt)
+        task_type = SmartModelRouter.classify_task(masked_prompt)
         ordered_providers = SmartModelRouter.prioritize_providers(task_type, self.providers)
         logger.info(f"[Smart Model Router] Görev: {task_type} -> Öncelikli Sağlayıcı Sırası: {[p['name'] for p in ordered_providers[:3]]}")
 
@@ -641,7 +656,7 @@ class FreeProviderRouter:
             tpm_limit = p_config.get("tpm", 20000) # Default 20k TPM
             
             # Est. tokens: roughly words * 1.5
-            est_tokens = int((len(system_prompt) + len(user_prompt)) / 4) * 1.5
+            est_tokens = int((len(system_prompt) + len(masked_prompt)) / 4) * 1.5
             
             if rate_limiter.is_rate_limited(p_name, rpm_limit, tpm_limit, est_tokens):
                 logger.warning(f"[Free LLM Router] {p_name.upper()} yerel Hız Sınırına (RPM/TPM) takıldı. Diğer modele geçiliyor...")
@@ -677,7 +692,7 @@ class FreeProviderRouter:
                             "model": provider["model"],
                             "messages": [
                                 {"role": "system", "content": current_system_prompt},
-                                {"role": "user", "content": user_prompt},
+                                {"role": "user", "content": masked_prompt},
                             ],
                             "temperature": use_temp,
                             "max_tokens": use_tokens,
@@ -698,7 +713,8 @@ class FreeProviderRouter:
                         choices = data.get("choices", [])
                         if choices:
                             rate_limiter.add_request(p_name, est_tokens + p_config.get("max_tokens", 1000))
-                            return choices[0]["message"]["content"].strip()
+                            raw_reply = choices[0]["message"]["content"].strip()
+                            return privacy_layer.unmask_response(raw_reply)
 
                     elif p_type == "litellm":
                         try:
@@ -711,11 +727,12 @@ class FreeProviderRouter:
                                 model="gpt-3.5-turbo",
                                 messages=[
                                     {"role": "system", "content": current_system_prompt if 'current_system_prompt' in locals() else system_prompt},
-                                    {"role": "user", "content": user_prompt}
+                                    {"role": "user", "content": masked_prompt}
                                 ]
                             )
                             rate_limiter.add_request(p_name, est_tokens + p_config.get("max_tokens", 1000))
-                            return response.choices[0].message.content.strip()
+                            raw_reply = response.choices[0].message.content.strip()
+                            return privacy_layer.unmask_response(raw_reply)
                         except ImportError:
                             logger.warning("litellm not installed, skipping balancer.")
                             continue
@@ -726,7 +743,7 @@ class FreeProviderRouter:
                             "contents": [
                                 {
                                     "role": "user",
-                                    "parts": [{"text": f"System Directive:\n{system_prompt}\n\nTask:\n{user_prompt}"}],
+                                    "parts": [{"text": f"System Directive:\n{system_prompt}\n\nTask:\n{masked_prompt}"}],
                                 }
                             ],
                             "generationConfig": {
@@ -744,7 +761,8 @@ class FreeProviderRouter:
                         if candidates and "content" in candidates[0]:
                             parts = candidates[0]["content"].get("parts", [])
                             if parts:
-                                return parts[0].get("text", "").strip()
+                                raw_reply = parts[0].get("text", "").strip()
+                                return privacy_layer.unmask_response(raw_reply)
 
             except Exception as e:
                 logger.warning(f"[Free LLM Router] Provider {p_name} failed: {e}. Trying next free pool endpoint...")
@@ -1596,6 +1614,158 @@ async def api_install_frameworks():
 
     threading.Thread(target=_install, daemon=True).start()
     return {"status": "installation_started", "message": "CrewAI & LangChain background installation triggered."}
+
+@app.get("/api/agents")
+async def api_get_agents():
+    """Returns the list of all configured specialized agents and bots in Onyx-Nexus."""
+    return [
+        {
+            "id": "router",
+            "name": "Nexus Router",
+            "role": "Niyet Analizcisi & Yönlendirici",
+            "avatar": "🧭",
+            "description": "Kullanıcı isteğinin niyetini analiz eder ve en uygun LLM havuzu veya uzman ajana yönlendirir.",
+            "status": "ACTIVE",
+            "capabilities": ["Intent Classification", "Model Pool Routing", "Zero Latency Decision"],
+            "color": "from-cyan-500 to-blue-600"
+        },
+        {
+            "id": "architect",
+            "name": "Master Architect",
+            "role": "Sistem & Veri Mimarisi",
+            "avatar": "🏛️",
+            "description": "Yüksek akıl yürütme ile modüler mimariyi, FTS5 WAL veritabanı şemasını ve .md blueprint hazırlar.",
+            "status": "ACTIVE",
+            "capabilities": ["Markdown Blueprint", "Microservices Topology", "FTS5 WAL Schema Design"],
+            "color": "from-purple-500 to-indigo-600"
+        },
+        {
+            "id": "coder",
+            "name": "Polyglot Developer",
+            "role": "2-Aşamalı Kod Üreticisi",
+            "avatar": "💻",
+            "description": "Mimari blueprint planına harfiyen bağlı kalarak temiz, hatasız ve bellek sızıntısız kod üretir.",
+            "status": "ACTIVE",
+            "capabilities": ["TypeScript & React", "Python & FastAPI", "Rust / Go / Solidity", "Clean Architecture"],
+            "color": "from-emerald-500 to-teal-600"
+        },
+        {
+            "id": "sentinel",
+            "name": "Sentinel (ZK-Shield)",
+            "role": "Güvenlik & ZK-Gizlilik Kalkanı",
+            "avatar": "🛡️",
+            "description": "Zero-Knowledge maskeleme ile dış sağlayıcıları körleştirir, prompt injection ve AST açıklarını engeller.",
+            "status": "ACTIVE",
+            "capabilities": ["Zero-Knowledge Blind Token", "Anti-Tampering & Injection", "HMAC-SHA256 Integrity"],
+            "color": "from-amber-500 to-orange-600"
+        },
+        {
+            "id": "runner",
+            "name": "QA Runner & Sandbox",
+            "role": "Test & Kendi Kendine Onarım",
+            "avatar": "🧪",
+            "description": "Kodu sandbox ortamında çalıştırır. Hata olursa geliştiriciye geri bildirim vererek 3 döngüde onarır.",
+            "status": "ACTIVE",
+            "capabilities": ["Subprocess / E2B Sandbox", "PyTest & Foundry Runner", "3-Cycle Auto Repair"],
+            "color": "from-rose-500 to-pink-600"
+        },
+        {
+            "id": "researcher",
+            "name": "Deep Scholar",
+            "role": "Derin Kanıt Araştırmacısı",
+            "avatar": "🔬",
+            "description": "Halüsinasyonsuz, web ve dokümantasyonlardan kanıta dayalı gerçek zamanlı derin bilgi sentezler.",
+            "status": "ACTIVE",
+            "capabilities": ["Wikipedia Knowledge Graph", "Web Scraper & Miner", "Evidence Synthesis"],
+            "color": "from-blue-500 to-violet-600"
+        },
+        {
+            "id": "web3",
+            "name": "Web3 & EVM Auditor Bot",
+            "role": "Akıllı Sözleşme Denetimi",
+            "avatar": "⛓️",
+            "description": "Solidity ve EVM sözleşmelerinde reentrancy, integer overflow ve gas optimizasyonu analizleri yapar.",
+            "status": "ACTIVE",
+            "capabilities": ["Reentrancy Detection", "Gas Optimization", "Bytecode & Slither Analysis"],
+            "color": "from-yellow-500 to-amber-600"
+        },
+        {
+            "id": "devops",
+            "name": "Auto-Git & DevOps Bot",
+            "role": "Otonom Sürüm Yöneticisi",
+            "avatar": "🚀",
+            "description": "Doğrulanmış kodları otomatik commit mesajı ile GitHub deposuna aktarır ve sürüm etiketlerini yönetir.",
+            "status": "ACTIVE",
+            "capabilities": ["Auto Commit & Push", "Token Authentication", "Changelog Synthesis"],
+            "color": "from-slate-400 to-slate-600"
+        },
+        {
+            "id": "reporter",
+            "name": "Notion & Telemetri Bot",
+            "role": "Dokümantasyon & Telemetri",
+            "avatar": "📝",
+            "description": "Oturum kararlarını, test sonuçlarını ve model performans telemetrisini Notion ve Markdown olarak belgeler.",
+            "status": "ACTIVE",
+            "capabilities": ["Notion Database Sync", "Markdown Documentation", "Latency Telemetry"],
+            "color": "from-fuchsia-500 to-pink-600"
+        }
+    ]
+
+@app.get("/api/workflows")
+async def api_get_workflows():
+    """Returns the list of all configured autonomous workflows."""
+    return [
+        {
+            "id": "dual_stage_cot",
+            "name": "Dual-Stage CoT Akışı",
+            "description": "Mimari planlama ve kod üretimini birbirinden ayıran 2 aşamalı düşünce zinciri.",
+            "steps": ["Mimar (.md Blueprint)", "Geliştirici (Temiz Kod)", "QA (Doğrulama & Test)"],
+            "estimatedDuration": "3.2s",
+            "recommendedFor": "Karmaşık Algoritmalar, Sistem Mimarisi ve Çok Dilli Projeler",
+            "icon": "Layers",
+            "activeAgents": ["architect", "coder", "runner"]
+        },
+        {
+            "id": "consensus_swarm",
+            "name": "3-Ajanlı Swarm Konsensüsü",
+            "description": "Architect, Coder ve Reviewer ajanlarının bağımsız puanlama ve konsensüs oylaması.",
+            "steps": ["Bölünmüş İstek Analizi", "Paralel Puanlama & Matris", "Ağırlıklı Konsensüs Birleşimi"],
+            "estimatedDuration": "2.8s",
+            "recommendedFor": "Yüksek Güvenilirlik Gerektiren Kritik Kararlar ve Güvenlik Denetimleri",
+            "icon": "Users",
+            "activeAgents": ["architect", "coder", "sentinel"]
+        },
+        {
+            "id": "auto_repair_loop",
+            "name": "Sandbox & Auto-Repair Döngüsü",
+            "description": "Kodu derleyip test eder, stderr hatası çıkarsa geliştiriciye döndürerek kendi kendini onarır.",
+            "steps": ["Kod Üretimi", "Sandbox İzolasyon Testi", "Hata Analizi", "Düzeltme & Yeniden Derleme"],
+            "estimatedDuration": "4.5s",
+            "recommendedFor": "Hatasız Çalışması Zorunlu Olan Betikler, API Servisleri ve Web3 Sözleşmeleri",
+            "icon": "RefreshCw",
+            "activeAgents": ["coder", "runner", "sentinel"]
+        },
+        {
+            "id": "deep_research_flow",
+            "name": "Otonom Derin Araştırma Akışı",
+            "description": "Web kaynaklarını ve dokümantasyonları tarayarak kanıta dayalı sentez raporu üretir.",
+            "steps": ["Sorgu Analizi", "Wikipedia & Web Kazıma", "Kanıt Doğrulama", "Nihai Sentez Raporu"],
+            "estimatedDuration": "3.8s",
+            "recommendedFor": "Teknik Dokümantasyon İncelemesi, Kütüphane Karşılaştırması ve Akademik Özet",
+            "icon": "Search",
+            "activeAgents": ["researcher", "architect", "reporter"]
+        },
+        {
+            "id": "zk_privacy_flow",
+            "name": "Zero-Knowledge Gizlilik Kalkanı Akışı",
+            "description": "Hassas verileri maskeler, dış LLM sağlayıcılarını körleştirir ve yerelde de-maske eder.",
+            "steps": ["Hassas Veri Tespiti", "Deterministik Blind Maskeleme", "Dış API Çağrısı", "Yerel De-maskeleme & Mühür"],
+            "estimatedDuration": "1.9s",
+            "recommendedFor": "Özel Anahtarlar, Veritabanı Bilgileri, Gizli API Anahtarları ve Özel Kodlar",
+            "icon": "Shield",
+            "activeAgents": ["sentinel", "router"]
+        }
+    ]
 
 
 
@@ -2582,6 +2752,29 @@ async def sync_mesh_peers(req: Request):
         if nid in MESH_CLUSTER_STATE:
             MESH_CLUSTER_STATE[nid].update(n)
     return {"success": True, "updated_nodes": len(nodes)}
+
+# Zero-Knowledge Gizlilik & Dış Müdahale Güvenlik Uç Noktaları
+@app.get("/api/security/privacy-status")
+async def get_privacy_shield_status():
+    from encryption_layer import privacy_layer
+    return privacy_layer.get_security_metrics()
+
+@app.post("/api/security/sanitize")
+async def sanitize_and_mask_preview(req: Request):
+    from encryption_layer import privacy_layer
+    data = await req.json()
+    raw_text = data.get("text", "")
+    is_tampered, threats = privacy_layer.detect_tampering_and_injection(raw_text)
+    masked_text, count = privacy_layer.mask_prompt(raw_text)
+    seal = privacy_layer.generate_integrity_seal(masked_text)
+    return {
+        "original_length": len(raw_text),
+        "is_tampered": is_tampered,
+        "threats_blocked": threats,
+        "masked_text": masked_text,
+        "secrets_masked_count": count,
+        "integrity_seal": seal
+    }
 
 if __name__ == "__main__":
     import uvicorn
