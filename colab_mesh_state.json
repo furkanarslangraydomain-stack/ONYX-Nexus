@@ -1,52 +1,7 @@
 {
-  "timestamp": 1789892950.9987738,
-  "updated_at": "2026-09-20T08:29:10.998776",
-  "cluster_status": "STANDALONE_LOCAL",
-  "nodes": [
-    {
-      "node_id": 1,
-      "name": "Master Orchestrator",
-      "port": 8000,
-      "role": "Orchestrator & Gateway",
-      "status": "OFFLINE",
-      "latency_ms": null
-    },
-    {
-      "node_id": 2,
-      "name": "Polyglot Compiler Sandbox",
-      "port": 8001,
-      "role": "Compiler Sandbox",
-      "status": "OFFLINE",
-      "latency_ms": null
-    },
-    {
-      "node_id": 3,
-      "name": "Consensus Swarm & Deep Research",
-      "port": 8002,
-      "role": "Consensus Engine",
-      "status": "OFFLINE",
-      "latency_ms": null
-    },
-    {
-      "node_id": 4,
-      "name": "3D Render Studio Engine",
-      "port": 8003,
-      "role": "3D Studio Engine",
-      "status": "OFFLINE",
-      "latency_ms": null
-    },
-    {
-      "node_id": 5,
-      "name": "Distributed Vector DB & FTS5 Hub",
-      "port": 8004,
-      "role": "Memory Hub",
-      "status": "OFFLINE",
-      "latency_ms": null
-    }
-  ],
-  "public_tunnel_url": null,
-  "fts5_wal_synced": false,
-  "model_pool_size": 30,
-  "zk_shield_active": true,
-  "git_commit": "3f09ef2"
+  "mode": "single-cell-colab-ssh",
+  "mesh_removed": true,
+  "ports": [8000],
+  "ssh_tunnel": "tmate",
+  "status": "not-running"
 }
