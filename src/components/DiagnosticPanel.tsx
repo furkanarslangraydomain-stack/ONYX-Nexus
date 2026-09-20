@@ -71,12 +71,15 @@ export function DiagnosticPanel() {
     try {
       const response = await fetch('/api/diagnostics/env');
       if (response.ok) {
-        const data = await response.json();
-        setDiagnosticData(data);
-        if (data.API_POOL_BASE_URL?.exported && data.API_POOL_BASE_URL?.validFormat) {
-          setPoolTestStatus('Havuz URL formatı geçerli (OpenAI uyumlu /v1 uç noktası hazır)');
-        } else {
-          setPoolTestStatus('API_POOL_BASE_URL henüz export edilmemiş.');
+        const text = await response.text();
+        if (text && !text.trim().startsWith('<')) {
+          const data = JSON.parse(text);
+          setDiagnosticData(data);
+          if (data.API_POOL_BASE_URL?.exported && data.API_POOL_BASE_URL?.validFormat) {
+            setPoolTestStatus('Havuz URL formatı geçerli (OpenAI uyumlu /v1 uç noktası hazır)');
+          } else {
+            setPoolTestStatus('API_POOL_BASE_URL henüz export edilmemiş.');
+          }
         }
       }
     } catch (err) {

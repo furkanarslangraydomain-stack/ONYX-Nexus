@@ -210,6 +210,18 @@ export function PolyglotSandbox() {
     else setQaFramework('jest');
   };
 
+  const safeJson = async (res: Response) => {
+    try {
+      const text = await res.text();
+      if (!text || text.trim().startsWith('<')) {
+        return null;
+      }
+      return JSON.parse(text);
+    } catch {
+      return null;
+    }
+  };
+
   const handleCompile = async () => {
     setIsCompiling(true);
     try {
@@ -218,8 +230,16 @@ export function PolyglotSandbox() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ language: selectedLang, code, auto_repair: true })
       });
-      const data = await res.json();
-      setCompileResult(data);
+      const data = await safeJson(res);
+      if (data) {
+        setCompileResult(data);
+      } else {
+        setCompileResult({
+          success: false,
+          stderr: 'Derleyici servisi beklenmeyen bir yanıt döndürdü.',
+          errors: ['Geçersiz API yanıtı']
+        });
+      }
     } catch (err: any) {
       setCompileResult({
         success: false,
@@ -246,8 +266,10 @@ export function PolyglotSandbox() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ language: selectedLang, code, framework: qaFramework })
       });
-      const data = await res.json();
-      setGeneratedTests(data);
+      const data = await safeJson(res);
+      if (data) {
+        setGeneratedTests(data);
+      }
     } catch (err: any) {
       console.error(err);
     } finally {

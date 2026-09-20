@@ -57,15 +57,27 @@ function transferFunds(address recipient, uint256 amount) public {
     fetchFreeRepos();
   }, []);
 
+  const safeJson = async (res: Response) => {
+    try {
+      const text = await res.text();
+      if (!text || text.trim().startsWith('<')) {
+        return null;
+      }
+      return JSON.parse(text);
+    } catch {
+      return null;
+    }
+  };
+
   const fetchOpenApi = async () => {
     try {
       const res = await fetch('/api/openapi/spec');
-      const data = await res.json();
-      setOpenApiSpec(data);
+      const data = await safeJson(res);
+      if (data) setOpenApiSpec(data);
 
       const curlRes = await fetch('/api/openapi/curls');
-      const curlData = await curlRes.json();
-      setCurls(curlData);
+      const curlData = await safeJson(curlRes);
+      if (curlData) setCurls(curlData);
     } catch (e) {
       console.error(e);
     }
@@ -74,8 +86,10 @@ function transferFunds(address recipient, uint256 amount) public {
   const fetchFreeRepos = async () => {
     try {
       const res = await fetch('/api/freellm/repos');
-      const data = await res.json();
-      setFreeRepos(data.repos || []);
+      const data = await safeJson(res);
+      if (data && data.repos) {
+        setFreeRepos(data.repos);
+      }
     } catch (e) {
       console.error(e);
     }
@@ -89,8 +103,8 @@ function transferFunds(address recipient, uint256 amount) public {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code: consensusCode, task_desc: "Kritik Güvenlik ve Mimari Karar Matrisi" })
       });
-      const data = await res.json();
-      setConsensusResult(data);
+      const data = await safeJson(res);
+      if (data) setConsensusResult(data);
     } catch (e: any) {
       console.error(e);
     } finally {
@@ -106,8 +120,8 @@ function transferFunds(address recipient, uint256 amount) public {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ dialect: sqlDialect, query: sqlQuery })
       });
-      const data = await res.json();
-      setDbResult(data);
+      const data = await safeJson(res);
+      if (data) setDbResult(data);
     } catch (e: any) {
       console.error(e);
     } finally {
@@ -123,8 +137,12 @@ function transferFunds(address recipient, uint256 amount) public {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: commitMessage })
       });
-      const data = await res.json();
-      setGitOutput(data);
+      const data = await safeJson(res);
+      if (data) {
+        setGitOutput(data);
+      } else {
+        setGitOutput({ success: false, error: 'Sunucudan geçersiz yanıt alındı.' });
+      }
     } catch (e: any) {
       setGitOutput({ success: false, error: e.message });
     } finally {
