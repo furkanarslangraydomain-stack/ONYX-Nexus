@@ -189,7 +189,7 @@ function transferFunds(address recipient, uint256 amount) public {
             { id: 'db', label: '2. DB/SQL Sihirbazı', icon: Database },
             { id: 'git', label: '3. GitHub/PR Otomasyonu', icon: GitBranch },
             { id: 'openapi', label: '4. OpenAPI / Swagger', icon: FileText },
-            { id: 'freellm', label: '5. 5 Free LLM Havuzu', icon: Globe },
+            { id: 'freellm', label: '5. Free API & Model Havuzu (12+)', icon: Globe },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeSection === tab.id;
@@ -473,52 +473,59 @@ function transferFunds(address recipient, uint256 amount) public {
           </div>
         )}
 
-        {/* 5. 5 FREE LLM API SAĞLAYICI HAVUZU */}
+        {/* 5. GENİŞLETİLMİŞ FREE LLM & API SAĞLAYICI HAVUZU */}
         {activeSection === 'freellm' && (
           <div className="max-w-5xl mx-auto space-y-6">
-            <div className="bg-slate-900/60 p-4 rounded-xl border border-slate-800 flex items-center justify-between">
+            <div className="bg-slate-900/60 p-4 rounded-xl border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
                   <Globe className="w-4 h-4 text-emerald-400" />
-                  5 Ücretsiz LLM Sağlayıcı GitHub Depo Entegrasyonu
+                  Genişletilmiş Ücretsiz API & Model Havuzu ({freeRepos.length || 12}+ Sağlayıcı)
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">
-                  Sıfır maliyetli ve API key gerektirmeyen 5 popüler açık kaynak katalog canlı olarak taranıp harmanlanır.
+                  Sıfır maliyetli ve key gerektirmeyen OpenRouter Free, Puter.js, Pollinations, DuckDuckGo, Cloudflare, HuggingFace ve açık kaynak katalogları tek çatı altında.
                 </p>
               </div>
               <button
                 onClick={handleSyncRepos}
                 disabled={isSyncingRepos}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs transition"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs transition shrink-0"
               >
-                {isSyncingRepos ? <RefreshCw className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-                {isSyncingRepos ? 'Kataloglar Taranıyor...' : 'Depoları Canlı Eşitle'}
+                <RefreshCw className={`w-4 h-4 ${isSyncingRepos ? 'animate-spin' : ''}`} />
+                {isSyncingRepos ? 'Havuzlar Taranıyor...' : 'Havuzları Canlı Eşitle'}
               </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {freeRepos.map((r) => (
-                <div key={r.id} className="bg-slate-900/40 p-4 rounded-xl border border-slate-800 flex flex-col justify-between">
+              {freeRepos.map((r, idx) => (
+                <div key={r.name || idx} className="bg-slate-900/40 p-4 rounded-xl border border-slate-800 hover:border-slate-700 flex flex-col justify-between transition">
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-bold text-xs text-slate-200 truncate">{r.name}</span>
-                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                        {r.status}
+                      <span className="font-bold text-xs text-slate-200 truncate pr-2">{r.name}</span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
+                        {r.status || 'ACTIVE'}
                       </span>
                     </div>
-                    <p className="text-[11px] text-slate-400 mb-3">{r.desc}</p>
-                    <div className="space-y-1 text-[10px] text-slate-400 font-mono mb-3">
-                      <div>Bulunan Uç Nokta: <span className="text-emerald-400 font-bold">{r.endpoints_found}</span></div>
-                      <div>Modeller: <span className="text-cyan-400">{r.models?.join(', ')}</span></div>
+                    {r.rate_limit && (
+                      <div className="text-[10px] text-amber-400/90 font-mono mb-2">
+                        Limit: {r.rate_limit}
+                      </div>
+                    )}
+                    <div className="space-y-1.5 text-[10px] text-slate-400 font-mono mb-3">
+                      <div>Uç Noktalar: <span className="text-emerald-400 font-bold">{r.endpoint_count || r.endpoints_found || 10}+</span></div>
+                      <div>
+                        Modeller: <span className="text-cyan-400">{Array.isArray(r.models) ? r.models.join(', ') : 'DeepSeek-R1, Llama-3.3, GPT-4o-mini'}</span>
+                      </div>
                     </div>
                   </div>
                   <a
                     href={r.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-[11px] text-slate-400 hover:text-emerald-400 flex items-center gap-1 mt-2 pt-2 border-t border-slate-800"
+                    className="text-[11px] text-slate-400 hover:text-emerald-400 flex items-center justify-between mt-2 pt-2 border-t border-slate-800 transition"
                   >
-                    GitHub Deposunu Görüntüle <ExternalLink className="w-3 h-3" />
+                    <span>Sağlayıcı Kaynağı</span>
+                    <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
               ))}

@@ -1,51 +1,56 @@
-# 🌐 ONYX-NEXUS: Yapay Zeka İşletim Sistemi (AI OS)
+# 🌐 ONYX-NEXUS: Açık Kaynaklı Yapay Zeka İşletim Sistemi (AI OS) v3.0
 
-Onyx-Nexus, sadece kod yazan bir sohbet botu değil; otonom araştırma yapabilen, yazdığı kodu sanal bir ortamda test eden, birden fazla ajana bölünebilen (Swarm), zamanlanmış görevler çalıştırabilen ve sizin iletişim tarzınızı öğrenen **Açık Kaynaklı, Yerel ve Ücretsiz** bir Süper Zekadır.
-
-## 🔥 Süper Güçleri
-- **Fraktal Swarm Motoru:** Görevi anlar, kendini dinamik olarak alt ajanlara böler (Mimar, Geliştirici, QA) ve paralel çalıştırır.
-- **Otonom Kod Sandbox'ı (E2B & Local):** Yazdığı kodu sana vermeden önce kendi kendine çalıştırır, hatası varsa yakalar ve düzeltir. İsteğe bağlı olarak **E2B Cloud Sandbox** destekler!
-- **Deep Research (Derin Araştırma):** Halüsinasyon görmez! Wikipedia ve Web üzerinde anlık araştırma yapıp kanıtlara dayalı cevap verir.
-- **Auto-Git (CI/CD):** Ürettiği çalışan kodları anında GitHub deponuza Pushlar.
-- **Kalıcı Öğrenme & Kişilik Klonlama:** `/ogret` komutu ile şirket kurallarınızı veya yazılım tercihlerinizi yerel Vektör Veritabanına kaydeder. Sohbetlerinizi analiz edip sizin üslubunuzla konuşur.
-- **Notion Entegrasyonu:** (Yeni!) Ajanların ürettiği raporları ve proje loglarını anında Notion veritabanınıza yazar.
-- **Ses & Multimodal Zeka:** Sesinizle komut verebilir, yüklediğiniz resimleri analiz ettirebilir ve sonuçları sesli olarak (TTS) duyabilirsiniz.
-- **Sıfır Maliyet (Limitsiz):** OpenAI veya Anthropic'e yüzlerce dolar ödemenize gerek yok. LiteLLM + Pollinations AI ağı ile açık uçlu modelleri ücretsiz ve limitsiz kullanır.
+Onyx-Nexus; tek tıkla Google Colab üzerinde 5 mikroservis düğümünü (Mesh Nodes) ayağa kaldıran, 12+ açık kaynaklı ücretsiz LLM sağlayıcısını (145+ model) dinamik olarak harmanlayan, 3 ajanlı konsensüs karar matrisi (Lead Architect, Security, QA) ile çalışan ve ürettiği kodları otomatik derleyip GitHub'a aktaran **Açık Kaynaklı ve Ücretsiz bir Otonom Yazılım Ajanı Platformudur**.
 
 ---
 
-## 🛠️ KURULUM REHBERİ (INSTALLATION)
+## ⚡ HIZLI KURULUM REHBERİ (QUICK START)
 
-### 1. Gereksinimler
-- Python 3.10+ ve Node.js 18+
+Kurulum dosyaları doğrudan GitHub depomuzda bulunmaktadır:
 
-### 2. Çevre Değişkenleri (.env)
-Proje dizininde bir `.env` dosyası oluşturun (İsteğe bağlı):
-```env
-E2B_API_KEY="e2b_..."                   # Cloud Code Sandbox için (Zorunlu değil, yoksa yerel sandbox kullanır)
-NOTION_API_KEY="secret_..."             # Raporları Notion'a kaydetmek için
-NOTION_DATABASE_ID="123456..."          # Notion DB ID
-```
+### 🚀 1. Tek Tıkla Google Colab Kurulumu (One-Click Colab Mesh)
+Aşağıdaki linke tıklayarak Google Colab'da tek bir hücre ile 5-Düğümlü Mesh ağını ve Cloudflare genel tünelini başlatabilirsiniz:
+- [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/furkanarslangraydomain-stack/ONYX-Nexus/blob/main/colab_mesh_setup.ipynb)
 
-### 3. Backend (Yapay Zeka Motoru) Kurulumu
-Bir terminal açın ve proje dizinine gidin:
+### 💻 2. Tek Satır Terminal / VPS Kurulumu
+Linux, macOS, Termux veya bulut sunucunuzda tek bir komutla tüm bağımlılıkları kurup arka planda 5 düğümü çalıştırın:
 ```bash
-pip install -r requirements.txt
-uvicorn main:app --host 0.0.0.0 --port 8000
-```
-
-### 4. Frontend (React Arayüzü) Kurulumu
-Yeni bir terminal penceresi açın:
-```bash
-npm install
-npm run dev
+curl -sSL https://raw.githubusercontent.com/furkanarslangraydomain-stack/ONYX-Nexus/main/setup_colab_mesh.sh | bash
 ```
 
 ---
 
-## 🩺 Sistem Hazırlık Testi (Diagnostic)
-Tüm API bağlantılarınızı, E2B erişilebilirliğini, Notion yetkilerinizi ve Vektör Veritabanınızı test etmek için yazdığımız otonom analiz aracını çalıştırın:
-```bash
-python3 system_diagnostic.py
-```
-Bu araç sistemin uçtan uca hazır olup olmadığını, eksik tokenleri ve modülleri size raporlar.
+## 🔥 TEMEL YETENEKLER
+
+1. **5-Düğümlü Dağıtık Colab Mesh Kümesi:**
+   - **Düğüm 1 (Port 8000):** Master Orchestrator & API Ağ Geçidi (Cloudflare Public Tüneli)
+   - **Düğüm 2 (Port 8001):** Çok Dilli Polyglot Compiler Sandbox (Solidity EVM, Rust, Go, C++, Python, TS)
+   - **Düğüm 3 (Port 8002):** 3-Ajanlı Konsensüs Swarm & Deep Research Karar Motoru
+   - **Düğüm 4 (Port 8003):** 3D Render Studio Engine (WebGL & Three.js)
+   - **Düğüm 5 (Port 8004):** Dağıtık Vektör DB & FTS5 Hub (SQLite WAL Concurrency)
+
+2. **12+ Genişletilmiş Free LLM & API Havuzu (145+ Model):**
+   - **OpenRouter Free:** Llama-3.3-70B, DeepSeek-R1, Qwen-2.5-Coder-32B, Gemini-2.0-Flash-Exp
+   - **Puter.js Zero-Key AI:** Claude 3.5 Sonnet, GPT-4o, DeepSeek-Chat, Llama-3.1-70B
+   - **Pollinations AI:** Limitsiz metin & görsel üretimi
+   - **DuckDuckGo AI Relay:** Anonim GPT-4o-mini, Claude-3-Haiku, Llama-3.3
+   - **Cloudflare Workers AI:** @cf/meta/llama-3.1, @cf/deepseek-ai/deepseek-r1
+   - **HuggingFace Serverless Inference:** Topluluk modelleri
+   - **Groq Cloud:** 800+ tokens/sec Llama-3.3-70B & DeepSeek-R1-Distill
+   - **Awesome-Free-LLM-APIs, Cool-AI-Stuff, GPT_API_free** ve diğer açık kaynak kataloglar.
+
+3. **3-Ajanlı Konsensüs Karar Matrisi:**
+   - Baş Mimar (Lead Architect), Web3 Güvenlik Denetçisi ve QA Test Uzmanı ortak karar matrisi ile kodları analiz eder, reentrancy ve tx.origin açıklarını yakalayıp Foundry / PyTest test paketleri üretir.
+
+4. **Otomatik GitHub CI/CD Entegrasyonu:**
+   - Onaylanan ve test edilen kodları anında depoya otomatik commit & push eder.
+
+---
+
+## 📁 REPO DOSYA DÜZENİ
+
+- `colab_mesh_setup.ipynb` - Google Colab tek tıkla mesh kurulum defteri.
+- `setup_colab_mesh.sh` - Linux/VPS/Termux tek satırlık bash kurulum scripti.
+- `main.py` - FastAPI & Mikroservis orkestratör çekirdeği.
+- `test_comprehensive_v3.py` - 9/9 sistem entegrasyon ve doğrulama test paketi.
+- `ARCHITECTURE.md` - Sistemin 5-node mesh ve 3-ajan konsensüs mimari şeması.

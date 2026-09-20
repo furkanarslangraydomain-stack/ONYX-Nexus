@@ -1,23 +1,20 @@
-export type DeliverableTab =
-  | 'agent_crew.py'
-  | 'main.py'
-  | 'colab_dashboard.py'
-  | 'colab_runner.py'
-  | 'onyx_nexus_colab.ipynb'
-  | 'requirements.txt'
-  | 'install.sh'
-  | 'setup.sh'
-  | 'integration_guide.md'
-  | '.env.example';
-
 export type MainTab =
-  | 'deliverables'
-  | 'colab-control'
-  | 'cloud-deploy'
-  | 'simulator'
-  | 'openwebui-setup'
-  | 'architecture'
-  | '3d-studio';
+  | 'chat'
+  | 'mesh'
+  | 'autonomous'
+  | 'sandbox'
+  | 'arch'
+  | 'tools';
+
+export interface MeshNodeState {
+  node_id: number;
+  name: string;
+  port: number;
+  role: string;
+  status: 'ONLINE' | 'READY' | 'BUSY' | 'SYNCING';
+  latency?: string;
+  public_url?: string;
+}
 
 export interface AgentPhaseState {
   id: number;
