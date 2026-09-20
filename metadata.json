@@ -1,6 +1,6 @@
 {
   "name": "ONYX-Nexus Autonomous AI Operating System",
-  "description": "ONYX-Nexus Otonom Yapay Zeka İşletim Sistemi: Canlı IDE çalışma alanı, Web PTY terminali, 9-ajanlı sürü motoru, tek hücre Colab SSH sunucusu, SQLite FTS5 bilgi grafiği ve otonom GitHub CI/CD.",
-  "requestFramePermissions": [],
+  "description": "ONYX-Nexus Otonom Yapay Zeka İşletim Sistemi: Gemini tarzı sohbet & TTS sesli asistan, Three.js 3D render stüdyosu, canlı IDE çalışma alanı, 9-ajanlı sürü motoru, tek hücre Colab SSH sunucusu, SQLite FTS5 bilgi grafiği ve otonom GitHub CI/CD.",
+  "requestFramePermissions": ["microphone"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

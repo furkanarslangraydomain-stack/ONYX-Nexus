@@ -211,7 +211,7 @@ export class AudioReactiveEngine {
       return { bass: 0, mid: 0, treble: 0, peak: 0 };
     }
 
-    this.analyser.getByteFrequencyData(this.dataArray);
+    this.analyser.getByteFrequencyData(this.dataArray as any);
     const count = this.dataArray.length;
 
     // Bass: bins 0 to 12 (~0-400Hz)
