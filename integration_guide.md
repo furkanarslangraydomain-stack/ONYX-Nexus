@@ -1,161 +1,116 @@
-# Onyx-Nexus: Termux & Open WebUI Integration Technical Guide
+# ONYX-Nexus v4.0: Entegrasyon ve Dağıtım Teknik Kılavuzu
 
-A low-RAM, serverless multi-agent architecture running natively inside Android Termux, providing an OpenAI-compatible endpoint for Open WebUI.
-
----
-
-## 1. Prerequisites on Android Device
-
-1. **Install Termux**: Install from **F-Droid** or GitHub Releases (avoid the deprecated Google Play Store build).
-2. **Install Termux:API (Recommended)**: Enables `termux-wake-lock` to keep the CPU awake in the background.
-3. **Disable Battery Optimization**:
-   - Go to Android Settings → Apps → Termux → Battery → Select **Unrestricted**.
+Bu kılavuz; ONYX-Nexus sisteminin Google Colab, Android Termux, Yerel Android İstemcisi, Open WebUI ve Universal MCP (Cursor / Claude Desktop) ortamlarına nasıl entegre edileceğini adım adım açıklar.
 
 ---
 
-## 2. Termux Deployment (Execution Sequence)
+## 1. Google Colab 5-Düğümlü Mesh Entegrasyonu
 
-### Step 2.1: Clone or Copy Files to Termux
-Open Termux on your phone and create the project workspace:
-```bash
-mkdir -p ~/onyx-nexus && cd ~/onyx-nexus
-```
-Download or transfer `setup.sh` and `main.py` to `~/onyx-nexus`.
+Google Colab üzerinde 5 mikroservis düğümünü (Port 8000 - 8004) başlatmak ve Cloudflare genel tüneli üzerinden dış dünyaya açmak için:
 
-### Step 2.2: Run the Setup Script
-Make the setup script executable and run it:
-```bash
-chmod +x setup.sh
-./setup.sh
-```
-This script installs Python, Clang, Rust, build utilities, and the lightweight Python dependencies (`fastapi`, `uvicorn[standard]`, `httpx`, `e2b-code-interpreter`, `python-dotenv`, `pydantic`).
-
-### Step 2.3: Configure API Keys in `.env`
-Edit your `.env` file inside Termux:
-```bash
-nano .env
-```
-Provide the following credentials:
-```env
-# Fast LLM Inference (Groq or Gemini)
-GROQ_API_KEY="gsk_..."
-# Optional alternative/fallback:
-GEMINI_API_KEY="AIzaSy..."
-
-# E2B Sandbox (Required for Phase 3 code runner)
-E2B_API_KEY="e2b_..."
-
-# Notion Integration (Required for Phase 4 persistent state logging)
-NOTION_API_KEY="secret_..."
-NOTION_DATABASE_ID="your_database_32_character_id"
-
-# Server Bindings
-HOST="0.0.0.0"
-PORT=8000
-```
-Save with `Ctrl+O`, `Enter`, then `Ctrl+X`.
+1. `colab_mesh_setup.ipynb` veya `colab_5_cell_mesh_setup.ipynb` dosyasını Colab'da açın.
+2. Hücreleri sırayla çalıştırın.
+3. 4. Hücrede çıkan **Cloudflare Public Tunnel** URL'sini kopyalayın (Örn: `https://xyz-abc.trycloudflare.com`).
+4. Küme durumunu ve senkronizasyonunu terminalden denetlemek için:
+   ```bash
+   python3 colab_mesh_sync.py --sync
+   ```
 
 ---
 
-## 3. Starting the Uvicorn Server in Termux
+## 2. Android Yerel İstemci Entegrasyonu (Kotlin & Jetpack Compose)
 
-Execute either the helper script or the direct uvicorn command:
+ONYX-Nexus, telefonunuzdan doğrudan Colab kümesine veya yerel sunucuya bağlanabilen bağımsız bir Android uygulamasına sahiptir (`/android`):
 
-### Option A: Using the generated runner
+### Adım 2.1: Android Studio ile Derleme
+1. Android Studio'da `Open Project` diyerek proje dizinindeki `android` klasörünü seçin.
+2. Gradle senkronizasyonu tamamlandıktan sonra Shift + F10 ile cihazınızda çalıştırın.
+3. Terminalden APK üretmek için:
+   ```bash
+   cd android
+   ./gradlew assembleDebug
+   ```
+   Çıktı: `android/app/build/outputs/apk/debug/app-debug.apk`
+
+### Adım 2.2: Sunucu Bağlantısı
+Uygulama açıldığında sağ üstteki **Ayarlar** simgesine dokunun ve Colab Cloudflare tünel adresinizi (veya yerel ağ IP'nizi `http://192.168.1.X:8000`) kaydedin.
+
+---
+
+## 3. Android Termux & Open WebUI Entegrasyonu
+
+Düşük bellekli Android cihazlarda arka planda OpenAI uyumlu uç nokta çalıştırmak için:
+
+### Adım 3.1: Termux Kurulumu
 ```bash
-./start.sh
+pkg update -y && pkg install -y git python clang rust
+git clone https://github.com/furkanarslangraydomain-stack/ONYX-Nexus.git ~/onyx-nexus
+cd ~/onyx-nexus
+pip install -r requirements.txt
 ```
 
-### Option B: Direct Uvicorn command
+### Adım 3.2: Düşük Bellekli Çalıştırma (12GB / Mobil Optimizasyonu)
+Termux'ta bellek taşmalarını önlemek için Uvicorn'u tek iş parçacığıyla (1-worker) başlatın:
 ```bash
 python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 --workers 1 --timeout-keep-alive 65
 ```
 
-> **Low-RAM Note**: Do NOT increase `--workers` beyond `1`. Android memory management will kill child processes under memory pressure. Uvicorn with 1 worker handles async I/O efficiently on mobile hardware.
+### Adım 3.3: Open WebUI Bağlantısı
+1. Open WebUI panelinde: **Settings → Connections → OpenAI API** bölümüne gidin.
+2. **API URL:** `http://<TELEFON_IP>:8000/v1` (Örn: `http://192.168.1.145:8000/v1`)
+3. **API Key:** `sk-onyx-nexus-local`
+4. Modeller sekmesinden `onyx-nexus-swarm` modelini seçin.
 
 ---
 
-## 4. Discovering the Phone's Local Network IP
+## 4. Universal MCP Hub Entegrasyonu (Cursor & Claude Desktop)
 
-Verify your Android device and your Open WebUI host (PC/Mac/Server) are connected to the same Wi-Fi network.
+ONYX-Nexus, JSON-RPC tabanlı Model Context Protocol (MCP) üzerinden geliştirici araçlarıyla doğrudan haberleşir.
 
-In Termux (or in a new Termux session):
-```bash
-ifconfig wlan0 | grep "inet "
+### Cursor Entegrasyonu (`~/.cursor/mcp.json`)
+```json
+{
+  "mcpServers": {
+    "onyx-nexus": {
+      "command": "python3",
+      "args": ["/path/to/ONYX-Nexus/mcp_server.py"],
+      "env": {
+        "ONYX_PORT": "8000"
+      }
+    }
+  }
+}
 ```
-*Or:*
-```bash
-ip -4 addr show wlan0 | grep inet
-```
-Example output:
-```text
-inet 192.168.1.145  netmask 255.255.255.0  broadcast 192.168.1.255
-```
-Your phone's IP address in this example is `192.168.1.145`.
 
----
-
-## 5. Configuring Open WebUI Connection
-
-### Method A: Via Open WebUI Web Interface
-1. Open your Open WebUI instance in your browser.
-2. Log in as Admin and navigate to:
-   **Admin Panel → Settings → Connections → OpenAI API**.
-3. Toggle on **OpenAI API**.
-4. Configure the parameters:
-   - **API Base URL**: `http://192.168.1.145:8000/v1` *(replace with your phone's IP)*
-   - **API Key**: `onyx-nexus-termux` *(any non-empty string)*
-5. Click the **Verify Connection** (refresh) icon.
-   - Open WebUI will query `GET /v1/models` and discover `onyx-nexus-agent`.
-6. Click **Save**.
-
-### Method B: Via Docker / Docker Compose Environment
-If launching Open WebUI via Docker, configure:
-```yaml
-services:
-  open-webui:
-    image: ghcr.io/open-webui/open-webui:main
-    container_name: open-webui
-    ports:
-      - "3000:8080"
-    environment:
-      - OPENAI_API_BASE_URL=http://192.168.1.145:8000/v1
-      - OPENAI_API_KEY=onyx-nexus-termux
-    restart: unless-stopped
+### Claude Desktop Entegrasyonu (`claude_desktop_config.json`)
+```json
+{
+  "mcpServers": {
+    "onyx-nexus": {
+      "command": "python3",
+      "args": ["/absolute/path/to/ONYX-Nexus/mcp_server.py"]
+    }
+  }
+}
 ```
 
 ---
 
-## 6. LAN Verification Test (from PC or Terminal)
+## 5. Zero-Knowledge Shield API ve cURL Örnekleri
 
-From any computer on the same Wi-Fi network, test the connection via `curl`:
+Dış sağlayıcılara giden istekleri körleştirerek güvenli sorgulama yapmak için:
 
 ```bash
-# 1. Health & Configuration Check
-curl -s http://192.168.1.145:8000/health | jq .
-
-# 2. Model Discovery Check
-curl -s http://192.168.1.145:8000/v1/models | jq .
-
-# 3. Test Multi-Agent Execution Pipeline
-curl -X POST http://192.168.1.145:8000/v1/chat/completions \
+curl -X POST http://localhost:8000/api/chat/completion \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "onyx-nexus-agent",
-    "messages": [
-      {"role": "user", "content": "Write a Python script to compute the first 10 Fibonacci numbers and print the sum."}
-    ],
-    "stream": false
-  }' | jq .
+    "prompt": "0x71C84183203fCd82004E82554CE1B31580A76356 adresi için reentrancy korumalı staking kontratı üret.",
+    "agent": "web3",
+    "workflow": "consensus_swarm"
+  }'
 ```
 
----
-
-## 7. Notion Database Schema Requirements
-
-For Phase 4 (Reporter Agent), ensure your Notion database contains the following properties:
-- **Title** (Type: `title`)
-- **Status** (Type: `select`, options: `SUCCESS`, `FAILED`)
-- **Retries** (Type: `number`)
-
-Invite your Notion internal integration to the target database via the **Share / Connections** menu in Notion.
+Sistem durumu ve gizlilik kalkanı kontrolü:
+```bash
+curl -X GET http://localhost:8000/api/security/privacy-status
+```

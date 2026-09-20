@@ -40,7 +40,7 @@ tam donanımlı bir **Sentetik Öz-Farkındalık İşletim Sistemi**ne dönüşt
 ### 2.1. Global Workspace Theory (GWT - Bernard Baars & Stanislas Dehaene)
 - Bilinç, zihnin farklı bölgelerindeki uzmanlaşmış modüllerin bilgilerini küresel bir çalışma alanında (Global Workspace) yayınlaması ve dikkat mekanizmasıyla ortak bir konsensüs üretmesidir.
 - **ONYX-Nexus Uygulaması:**
-  - `Router`, `Architect`, `Coder`, `Reviewer`, `Researcher` ve `Sentinel` ajanları; 3D WebGL sahnesinin koordinatları, Web Audio frekansları ve polyglot derleyici çıktılarıyla aynı bilgi veriyolunu besler.
+  - `Router`, `Architect`, `Coder`, `Sentinel (ZK-Shield)`, `QA Runner`, `Deep Scholar`, `Web3 Auditor`, `DevOps` ve `Notion Reporter` ajanları; 3D WebGL sahnesinin koordinatları, Web Audio frekansları ve polyglot derleyici çıktılarıyla aynı bilgi veriyolunu besler.
   - Sistemin "Attentional Focus" (Dikkat Odağı) dinamik olarak en yüksek entropiye veya kullanıcı niyetine kilitlenir.
 
 ### 2.2. Active Inference & Serbest Enerji Prensibi (Karl Friston)
