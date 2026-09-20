@@ -9,11 +9,12 @@ import {
   Box,
   Activity,
   Github,
-  ChevronRight,
   ExternalLink,
   Cpu,
   Menu,
-  X
+  X,
+  Server,
+  Wrench
 } from 'lucide-react';
 import { ChatInterface } from './components/ChatInterface';
 import { ColabMeshMonitor } from './components/ColabMeshMonitor';
@@ -23,9 +24,10 @@ import { ArchitectureVisualizer } from './components/ArchitectureVisualizer';
 import { Web3AuditorPanel } from './components/Web3AuditorPanel';
 import { ThreeDStudioPanel } from './components/ThreeDStudioPanel';
 import { DiagnosticPanel } from './components/DiagnosticPanel';
+import { McpConnectHub } from './components/McpConnectHub';
+import { MainTab } from './types';
 
-type MainTab = 'chat' | 'mesh' | 'autonomous' | 'sandbox' | 'arch' | 'tools';
-type ToolSubTab = 'web3' | '3d' | 'diag';
+type ToolSubTab = 'web3' | 'diag';
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -48,6 +50,22 @@ export default function App() {
       icon: Network,
       badge: '5 Node',
       badgeColor: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
+    },
+    {
+      id: 'studio3d' as MainTab,
+      label: '3D Render Studio',
+      desc: 'WebGL, PBR Işıklandırma, Clay & Sahne Motoru',
+      icon: Box,
+      badge: 'Studio',
+      badgeColor: 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+    },
+    {
+      id: 'mcp' as MainTab,
+      label: 'Universal MCP Hub (36+ Araç)',
+      desc: 'Cursor, Claude, VSCode, Windsurf Entegrasyonu',
+      icon: Server,
+      badge: '8+ IDE',
+      badgeColor: 'bg-purple-500/10 text-purple-400 border-purple-500/20'
     },
     {
       id: 'autonomous' as MainTab,
@@ -75,11 +93,11 @@ export default function App() {
     },
     {
       id: 'tools' as MainTab,
-      label: 'Web3, 3D & Tanılama',
-      desc: 'Sözleşme Denetimi, 3D Motor & Ortam',
+      label: 'Web3 & Sistem Tanılama',
+      desc: 'Sözleşme Denetimi & Ortam Bilgisi',
       icon: Shield,
-      badge: 'Modüller',
-      badgeColor: 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+      badge: 'Araçlar',
+      badgeColor: 'bg-slate-500/10 text-slate-400 border-slate-500/20'
     }
   ];
 
@@ -170,7 +188,7 @@ export default function App() {
               <span className="text-[10px] font-mono text-emerald-400">5/5 Aktif</span>
             </div>
             <div className="text-[10px] text-slate-400 leading-tight">
-              Kurulum scriptleri GitHub deposuna taşındı.
+              3D Studio & MCP Hub hazır.
             </div>
           </div>
 
@@ -207,26 +225,28 @@ export default function App() {
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-slate-300 font-semibold hidden sm:inline">ONYX-Nexus</span>
               <span className="text-slate-600 hidden sm:inline">•</span>
-              <span className="text-emerald-400 font-medium">145+ Free API Havuzu</span>
+              <span className="text-emerald-400 font-medium">3D Render Studio</span>
               <span className="text-slate-600 hidden sm:inline">•</span>
-              <span className="text-cyan-400 hidden sm:inline">5-Node Mesh</span>
+              <span className="text-purple-400 hidden sm:inline">Universal MCP Hub</span>
             </div>
           </div>
 
           {/* Quick Tab Switcher Pills */}
-          <div className="flex items-center gap-1 bg-slate-950/70 p-1 rounded-xl border border-slate-800/80 text-xs font-medium">
+          <div className="flex items-center gap-1 bg-slate-950/70 p-1 rounded-xl border border-slate-800/80 text-xs font-medium overflow-x-auto max-w-full">
             {[
               { id: 'chat' as MainTab, label: 'Chat' },
               { id: 'mesh' as MainTab, label: 'Colab Mesh' },
-              { id: 'autonomous' as MainTab, label: 'Konsensüs & API' },
+              { id: 'studio3d' as MainTab, label: '3D Studio' },
+              { id: 'mcp' as MainTab, label: 'MCP Hub' },
+              { id: 'autonomous' as MainTab, label: 'Konsensüs' },
               { id: 'sandbox' as MainTab, label: 'Sandbox' },
               { id: 'arch' as MainTab, label: 'Mimari' },
-              { id: 'tools' as MainTab, label: 'Araçlar' }
+              { id: 'tools' as MainTab, label: 'Tanılama' }
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-3 py-1 rounded-lg transition text-[11px] font-mono ${
+                className={`px-2.5 py-1 rounded-lg transition text-[11px] font-mono shrink-0 ${
                   activeTab === tab.id
                     ? 'bg-slate-800 text-emerald-400 font-semibold shadow-sm'
                     : 'text-slate-400 hover:text-slate-200'
@@ -243,6 +263,18 @@ export default function App() {
           {activeTab === 'chat' && <ChatInterface />}
 
           {activeTab === 'mesh' && <ColabMeshMonitor />}
+
+          {activeTab === 'studio3d' && (
+            <div className="h-full overflow-y-auto w-full">
+              <ThreeDStudioPanel />
+            </div>
+          )}
+
+          {activeTab === 'mcp' && (
+            <div className="h-full overflow-y-auto w-full">
+              <McpConnectHub />
+            </div>
+          )}
 
           {activeTab === 'autonomous' && (
             <div className="h-full overflow-y-auto w-full">
@@ -278,16 +310,6 @@ export default function App() {
                   <Shield className="w-3.5 h-3.5" /> Web3 Denetçisi
                 </button>
                 <button
-                  onClick={() => setActiveToolSubTab('3d')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition ${
-                    activeToolSubTab === '3d'
-                      ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 font-semibold'
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  <Box className="w-3.5 h-3.5" /> 3D Sahne Stüdyosu
-                </button>
-                <button
                   onClick={() => setActiveToolSubTab('diag')}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition ${
                     activeToolSubTab === 'diag'
@@ -301,7 +323,6 @@ export default function App() {
 
               <div className="flex-1 overflow-y-auto p-4 sm:p-6 max-w-6xl mx-auto w-full">
                 {activeToolSubTab === 'web3' && <Web3AuditorPanel />}
-                {activeToolSubTab === '3d' && <ThreeDStudioPanel />}
                 {activeToolSubTab === 'diag' && <DiagnosticPanel />}
               </div>
             </div>

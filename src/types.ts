@@ -1,6 +1,8 @@
 export type MainTab =
   | 'chat'
   | 'mesh'
+  | 'studio3d'
+  | 'mcp'
   | 'autonomous'
   | 'sandbox'
   | 'arch'
