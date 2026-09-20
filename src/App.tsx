@@ -1,35 +1,36 @@
 import { useState } from 'react';
 import {
-  Layers,
-  Users,
-  GitBranch,
+  Code2,
   Server,
+  Users,
+  BrainCircuit,
+  GitBranch,
+  Cpu,
   ShieldAlert,
   Wrench,
+  Layers,
   Download,
   Github,
-  ExternalLink,
-  Sparkles,
-  Terminal,
-  Activity,
-  Cpu,
-  Boxes,
-  Zap
+  Boxes
 } from 'lucide-react';
-import { TopologyDiagram } from './components/TopologyDiagram';
-import { AgentSwarmView } from './components/AgentSwarmView';
-import { WorkflowsView } from './components/WorkflowsView';
+import { WorkspaceIdeView } from './components/WorkspaceIdeView';
 import { ColabSshServerView } from './components/ColabSshServerView';
+import { AgentSwarmView } from './components/AgentSwarmView';
+import { KnowledgeGraphView } from './components/KnowledgeGraphView';
+import { GithubCiCdView } from './components/GithubCiCdView';
+import { LoraFineTuningView } from './components/LoraFineTuningView';
 import { SecurityShieldView } from './components/SecurityShieldView';
 import { MegaMcpView } from './components/MegaMcpView';
+import { TopologyDiagram } from './components/TopologyDiagram';
+import { WorkflowsView } from './components/WorkflowsView';
 import { NodeDetailDrawer } from './components/NodeDetailDrawer';
 import { SchemaExportModal } from './components/SchemaExportModal';
 import { ArchitectureNode } from './types';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<
-    'topology' | 'swarm' | 'workflows' | 'server' | 'security' | 'mcp'
-  >('topology');
+    'workspace' | 'server' | 'swarm' | 'graph' | 'cicd' | 'lora' | 'security' | 'mcp' | 'blueprint'
+  >('workspace');
   const [selectedNode, setSelectedNode] = useState<ArchitectureNode | null>(null);
   const [isExportOpen, setIsExportOpen] = useState(false);
 
@@ -92,12 +93,15 @@ export default function App() {
         {/* Navigation Tabs Bar */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-1 overflow-x-auto no-scrollbar py-1">
           {[
-            { id: 'topology', label: '1. 5-Katmanlı Topoloji', icon: Layers, badge: '5 Katman' },
-            { id: 'swarm', label: '2. 9-Ajanlı Swarm', icon: Users, badge: 'Konsensüs ≥%85' },
-            { id: 'workflows', label: '3. Otonom Akışlar', icon: GitBranch, badge: '5 Pipeline' },
-            { id: 'server', label: '4. Colab SSH Sunucusu', icon: Server, badge: 'Gömülü Port 8000' },
-            { id: 'security', label: '5. ZK-Gizlilik Kalkanı', icon: ShieldAlert, badge: 'HMAC & Mask' },
-            { id: 'mcp', label: '6. Mega MCP Server', icon: Wrench, badge: '36+ Araç' }
+            { id: 'workspace', label: '1. OS Çalışma Alanı (IDE)', icon: Code2, badge: 'Canlı Kod & Shell' },
+            { id: 'server', label: '2. Colab SSH & GPU', icon: Server, badge: 'Gömülü Port 8000' },
+            { id: 'swarm', label: '3. 9-Ajanlı Swarm', icon: Users, badge: 'Konsensüs ≥%85' },
+            { id: 'graph', label: '4. Anlamsal Bilgi Grafiği', icon: BrainCircuit, badge: 'SQLite FTS5' },
+            { id: 'cicd', label: '5. GitHub CI/CD & Deploy', icon: GitBranch, badge: 'Auto Push' },
+            { id: 'lora', label: '6. Tesla T4 LoRA Stüdyosu', icon: Cpu, badge: 'QLoRA 4-bit' },
+            { id: 'security', label: '7. ZK-Gizlilik Kalkanı', icon: ShieldAlert, badge: 'HMAC & Mask' },
+            { id: 'mcp', label: '8. Mega MCP Sunucusu', icon: Wrench, badge: '36+ Araç' },
+            { id: 'blueprint', label: '9. Mimari Şema', icon: Layers, badge: '5 Katman' }
           ].map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -126,22 +130,28 @@ export default function App() {
 
       {/* Main Content Viewport */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
-        {activeTab === 'topology' && (
+        {activeTab === 'workspace' && <WorkspaceIdeView />}
+
+        {activeTab === 'server' && <ColabSshServerView />}
+
+        {activeTab === 'swarm' && <AgentSwarmView />}
+
+        {activeTab === 'graph' && <KnowledgeGraphView />}
+
+        {activeTab === 'cicd' && <GithubCiCdView />}
+
+        {activeTab === 'lora' && <LoraFineTuningView />}
+
+        {activeTab === 'security' && <SecurityShieldView />}
+
+        {activeTab === 'mcp' && <MegaMcpView />}
+
+        {activeTab === 'blueprint' && (
           <TopologyDiagram
             onSelectNode={(node) => setSelectedNode(node)}
             selectedNodeId={selectedNode?.id}
           />
         )}
-
-        {activeTab === 'swarm' && <AgentSwarmView />}
-
-        {activeTab === 'workflows' && <WorkflowsView />}
-
-        {activeTab === 'server' && <ColabSshServerView />}
-
-        {activeTab === 'security' && <SecurityShieldView />}
-
-        {activeTab === 'mcp' && <MegaMcpView />}
       </main>
 
       {/* Footer System Specs */}
