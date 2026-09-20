@@ -647,7 +647,9 @@ export const ColabControlCenter: React.FC = () => {
                     </div>
                     {!entry.is_dir && (
                       <span className="text-[9px] font-mono text-slate-500 shrink-0">
-                        {Math.round(entry.size_bytes / 1024)} KB
+                        {entry.size_bytes != null && Number.isFinite(Number(entry.size_bytes))
+                          ? `${Math.round(Number(entry.size_bytes) / 1024)} KB`
+                          : '0 KB'}
                       </span>
                     )}
                   </button>

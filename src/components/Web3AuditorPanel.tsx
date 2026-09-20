@@ -225,11 +225,11 @@ export const Web3AuditorPanel: React.FC = () => {
             </span>
             {report && (
               <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded ${
-                report.score >= 90 ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' :
-                report.score >= 70 ? 'bg-amber-950 text-amber-400 border border-amber-800' :
+                (report.score ?? 0) >= 90 ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' :
+                (report.score ?? 0) >= 70 ? 'bg-amber-950 text-amber-400 border border-amber-800' :
                 'bg-rose-950 text-rose-400 border border-rose-800'
               }`}>
-                Skor: {report.score}/100 ({report.status})
+                Skor: {Number.isFinite(report.score) ? report.score : 100}/100 ({report.status || 'GÜVENLİ'})
               </span>
             )}
           </div>

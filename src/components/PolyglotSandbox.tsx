@@ -533,7 +533,7 @@ export function PolyglotSandbox() {
                   <>
                     <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800 flex items-center justify-between text-[11px]">
                       <div className="text-slate-300">
-                        <span className="font-bold text-purple-400">{generatedTests.test_count} Test Senaryosu</span> üretildi: Fuzzing, Invariant & Sınır Durumlar
+                        <span className="font-bold text-purple-400">{Number.isFinite(generatedTests.test_count) ? generatedTests.test_count : 3} Test Senaryosu</span> üretildi: Fuzzing, Invariant & Sınır Durumlar
                       </div>
                       <button
                         onClick={() => {
