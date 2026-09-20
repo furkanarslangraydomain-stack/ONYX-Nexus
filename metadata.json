@@ -1,6 +1,6 @@
 {
-  "name": "ONYX-Nexus Mimari Şeması",
-  "description": "ONYX-Nexus Otonom Yapay Zeka İşletim Sistemi için interaktif katmanlı mimari şeması, 9-ajanlı sürü motoru, tek hücre Colab SSH sunucusu ve iş akışları görselleştiricisi.",
+  "name": "ONYX-Nexus Autonomous AI Operating System",
+  "description": "ONYX-Nexus Otonom Yapay Zeka İşletim Sistemi: Canlı IDE çalışma alanı, Web PTY terminali, 9-ajanlı sürü motoru, tek hücre Colab SSH sunucusu, SQLite FTS5 bilgi grafiği ve otonom GitHub CI/CD.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
