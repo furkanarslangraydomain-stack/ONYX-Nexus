@@ -15,11 +15,13 @@ import {
   Globe, 
   Layers, 
   Sparkles,
-  GitPullRequest
+  GitPullRequest,
+  Activity
 } from 'lucide-react';
+import { ModelTelemetryDashboard } from './ModelTelemetryDashboard';
 
 export function SystemAutonomousHub() {
-  const [activeSection, setActiveSection] = useState<'consensus' | 'db' | 'git' | 'openapi' | 'freellm'>('consensus');
+  const [activeSection, setActiveSection] = useState<'consensus' | 'db' | 'git' | 'openapi' | 'freellm' | 'telemetry'>('consensus');
 
   // Consensus State
   const [consensusCode, setConsensusCode] = useState(`// Akıllı Kontrat / Sistem Kodu Örneği
@@ -177,19 +179,20 @@ function transferFunds(address recipient, uint256 amount) public {
               </span>
             </div>
             <div className="text-[10px] text-slate-400">
-              3-Ajan Karar Matrisi • DB/SQL Optimizasyonu • Otomatik Git/PR • OpenAPI • 5 Free LLM Havuzu
+              3-Ajan Karar Matrisi • DB/SQL Optimizasyonu • Otomatik Git/PR • OpenAPI • 5 Free LLM Havuzu • Recharts Model Telemetrisi
             </div>
           </div>
         </div>
 
         {/* Section Tabs */}
-        <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800 text-xs">
+        <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800 text-xs overflow-x-auto">
           {[
             { id: 'consensus', label: '1. Swarm Konsensüsü', icon: ShieldCheck },
             { id: 'db', label: '2. DB/SQL Sihirbazı', icon: Database },
             { id: 'git', label: '3. GitHub/PR Otomasyonu', icon: GitBranch },
             { id: 'openapi', label: '4. OpenAPI / Swagger', icon: FileText },
             { id: 'freellm', label: '5. Free API & Model Havuzu (12+)', icon: Globe },
+            { id: 'telemetry', label: '6. Model Metrikleri & Telemetri (Recharts)', icon: Activity },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeSection === tab.id;
@@ -490,14 +493,23 @@ function transferFunds(address recipient, uint256 amount) public {
                   Sıfır maliyetli ve key gerektirmeyen OpenRouter Free, Puter.js, Pollinations, DuckDuckGo, Cloudflare, HuggingFace ve açık kaynak katalogları tek çatı altında.
                 </p>
               </div>
-              <button
-                onClick={handleSyncRepos}
-                disabled={isSyncingRepos}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs transition shrink-0"
-              >
-                <RefreshCw className={`w-4 h-4 ${isSyncingRepos ? 'animate-spin' : ''}`} />
-                {isSyncingRepos ? 'Havuzlar Taranıyor...' : 'Havuzları Canlı Eşitle'}
-              </button>
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <button
+                  onClick={() => setActiveSection('telemetry')}
+                  className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold text-xs transition shadow-sm"
+                >
+                  <Activity className="w-4 h-4" />
+                  Model Telemetrisi & Recharts Grafikleri
+                </button>
+                <button
+                  onClick={handleSyncRepos}
+                  disabled={isSyncingRepos}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs transition"
+                >
+                  <RefreshCw className={`w-4 h-4 ${isSyncingRepos ? 'animate-spin' : ''}`} />
+                  {isSyncingRepos ? 'Havuzlar Taranıyor...' : 'Havuzları Canlı Eşitle'}
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -534,6 +546,13 @@ function transferFunds(address recipient, uint256 amount) public {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* 6. MODEL METRİKLERİ & TELEMETRİ (RECHARTS) */}
+        {activeSection === 'telemetry' && (
+          <div className="max-w-6xl mx-auto">
+            <ModelTelemetryDashboard />
           </div>
         )}
 
